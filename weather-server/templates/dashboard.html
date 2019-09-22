@@ -9,14 +9,19 @@
     <title>Dashboard</title>
   </head>
   <body>
-    <div class="jumbotron">
-      <h1 class="display-4">Dashboard</h1>
-      <hr class="my-4">
-      <p class="lead">Temperate and Pressure readings from around the house!</p>
+    <div class="container-fluid">
+      <div class="jumbotron mt-3">
+        <h1 class="display-5">Dashboard</h1>
+        <hr class="my-3">
+        <p class="lead">Temperate and Pressure readings from around the house!</p>
+      </div>
+      <div class="row mx-lg-5">
+        <div class="col py-3 px-3">
+          <canvas id="tempChart"></canvas>
+        </div>
+      </div>
     </div>
-    <div class="w-50 mx-auto">
-      <canvas id="tempChart"></canvas>
-    </div>
+
     <script charset="utf-8">
       let ctx = document.getElementById('tempChart');
         let chart = new Chart(ctx, 
@@ -28,7 +33,16 @@
                 yAxes: [{
                   scaleLabel: {
                     display: true,
-                    labelString: 'Celcius'
+                    labelString: '{{ unit }}'
+                  },
+                  ticks: {
+                    stepSize: 0.5,
+                  }
+                }],
+                xAxes: [{
+                  ticks: {
+                    autoSkipPadding: 15,
+                    maxRotation: 45,
                   }
                 }]
               }

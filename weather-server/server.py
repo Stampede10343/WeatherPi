@@ -25,9 +25,15 @@ def log_temperatue():
 
 @app.route('/temperature', methods=['GET'])
 def get_temperature():
+    unit = request.args.get('unit', 'C')
+    unit = 'C' if unit != 'F' else unit
+
     connection = get_connection()
     temps = []
     for temp_reading in connection.execute('''SELECT date, temp FROM temperature ORDER BY date'''):
+        temp = temp_reading[1]
+        temp = temp if unit == 'C' else (temp * 1.8) + 32
+        temp_reading = (temp_reading[0], temp)
         temps.append(temp_reading)
         print(temp_reading)
 
@@ -44,10 +50,10 @@ def get_temperature():
         ]
     }
     for temp_reading in temps:
-        data['labels'].append(datetime.fromtimestamp(temp_reading[0]).strftime('%b, %d %I:%M:%S%p'))
+        data['labels'].append(datetime.fromtimestamp(temp_reading[0]).strftime('%b, %d %I:%M %p'))
         data['datasets'][0]['data'].append(temp_reading[1])
 
-    return render_template('dashboard.html', data=data)
+    return render_template('dashboard.html', data=data, unit=unit)
 
 def get_connection():
     return sqlite3.connect('temperature.db')
