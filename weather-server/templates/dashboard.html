@@ -3,9 +3,7 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
     <title>Dashboard</title>
   </head>
   <body>
@@ -16,12 +14,38 @@
         <p class="lead">Temperate and Pressure readings from around the house!</p>
       </div>
       <div class="row mx-lg-5">
-        <div class="col py-3 px-3">
-          <canvas id="tempChart"></canvas>
+        <div class="col px-3 mx-lg-5">
+          <div class="p-2 mx-lg-5">
+            <canvas id="tempChart" class="p-2" style="border-style: solid; border-color: #F0F0F0; border-width: 0.5em"></canvas>
+          </div>
         </div>
       </div>
-    </div>
+      <div class="row mt-4">
+        <div class="col col-md-3 mx-auto">
+          <form action"/temperature" method="GET">
+            <div class="input-group mb-3">
+              <label class="form-control">Interval</label>
+              <select name="interval" class="custom-select">
+                <option value="1">1 minute</option>
+                <option value="5">5 minutes</option>
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label class="form-control">Unit</label>
+              <select name="unit" class="custom-select">
+                <option value="F">Fahrenheit</option>
+                <option value="C">Celcius</option>
+              </select>
+            </div>
+            <button class="btn btn-primary form-control mt-3">Update</button>
+          </form>
+        </div>
+      </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
     <script charset="utf-8">
       let ctx = document.getElementById('tempChart');
         let chart = new Chart(ctx, 
