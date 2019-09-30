@@ -39,6 +39,12 @@ def get_temperature():
         temp_reading = (temp_reading[0], temp)
         temps.append(temp_reading)
 
+    maxt = convert_temp(connection.execute('''SELECT MAX(temp) FROM temperature WHERE date > strftime('%s', 'now', '-1 day')''').fetchone()[0], unit)
+    mint = convert_temp(connection.execute('''SELECT MIN(temp) FROM temperature WHERE date > strftime('%s', 'now', '-1 day')''').fetchone()[0], unit)
+
+    max_temp = str(round(maxt, 1)) + ' ' + unit
+    min_temp = str(round(mint, 1)) + ' ' + unit
+
     connection.close()
 
     filtered_temps = []
@@ -58,21 +64,20 @@ def get_temperature():
             {
                 'label': 'Temperature',
                 'data': [],
-                'backgroundColor': 'rgba(10, 50, 190, 0.2)'
+                'backgroundColor': 'rgba(10, 50, 190, 0.3)'
             }
         ]
     }
-
-    # shaped = np.array(temps)
-    # shaped.reshape(-1, 3)
-    # shaped.reshape(-1, 3).mean(axis=1)
-    # print(shaped[0])
 
     for temp_reading in filtered_temps:
         data['labels'].append(datetime.fromtimestamp(temp_reading[0]).strftime('%b, %d %I:%M %p'))
         data['datasets'][0]['data'].append(temp_reading[1])
 
-    return render_template('dashboard.html', data=data, unit=unit)
+    return render_template('dashboard.html', data=data, unit=unit, max_temp=max_temp, min_temp=min_temp)
+
+def convert_temp(temp, unit):
+    return temp if unit == 'C' else (temp * 1.8) + 32
+
 
 @app.route('/sampled')
 def get_sampled_data():
