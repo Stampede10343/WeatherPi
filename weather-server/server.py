@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import request, jsonify, render_template
+from flask import request, jsonify, render_template, make_response
 
 import os.path
 import time
@@ -9,6 +9,8 @@ import sqlite3
 
 import numpy as np
 from scipy import signal
+
+PRETTY_DATE = '%b, %d %I:%M %p'
 
 app = Flask(__name__)
 
@@ -28,7 +30,8 @@ def log_temperatue():
 
 @app.route('/temperature', methods=['GET'])
 def get_temperature():
-    unit = request.args.get('unit', 'C')
+    unit = request.cookies.get('unit', 'C')
+    unit = request.args.get('unit', unit)
     unit = 'C' if unit != 'F' else unit
 
     connection = get_connection()
@@ -39,16 +42,21 @@ def get_temperature():
         temp_reading = (temp_reading[0], temp)
         temps.append(temp_reading)
 
-    maxt = convert_temp(connection.execute('''SELECT MAX(temp) FROM temperature WHERE date > strftime('%s', 'now', '-1 day')''').fetchone()[0], unit)
-    mint = convert_temp(connection.execute('''SELECT MIN(temp) FROM temperature WHERE date > strftime('%s', 'now', '-1 day')''').fetchone()[0], unit)
-
-    max_temp = str(round(maxt, 1)) + ' ' + unit
-    min_temp = str(round(mint, 1)) + ' ' + unit
-
+    maxt, max_time = connection.execute('''SELECT MAX(temp), date FROM temperature WHERE date > strftime('%s', 'now', '-1 day')''').fetchone()
+    mint, min_time = connection.execute('''SELECT MIN(temp), date FROM temperature WHERE date > strftime('%s', 'now', '-1 day')''').fetchone()
     connection.close()
 
+    maxt = convert_temp(maxt, unit)
+    mint = convert_temp(mint, unit)
+    max_temp = str(round(maxt, 1)) + ' ' + unit
+    max_time = datetime.fromtimestamp(max_time).strftime(PRETTY_DATE)
+    min_temp = str(round(mint, 1)) + ' ' + unit
+    min_time = datetime.fromtimestamp(min_time).strftime(PRETTY_DATE)
+
     filtered_temps = []
-    batch = int(request.args.get('interval', 15))
+    interval = request.cookies.get('interval', 15)
+    batch = int(request.args.get('interval', interval))
+
     for index in range(batch, len(temps), batch):
         average_temp = 0
         average_time = 0
@@ -73,8 +81,12 @@ def get_temperature():
         data['labels'].append(datetime.fromtimestamp(temp_reading[0]).strftime('%b, %d %I:%M %p'))
         data['datasets'][0]['data'].append(temp_reading[1])
 
-    return render_template('dashboard.html', data=data, unit=unit, max_temp=max_temp, min_temp=min_temp)
+    response = make_response(render_template('dashboard.html',
+                           data=data, unit=unit, max_temp=max_temp, min_temp=min_temp, max_time=max_time, min_time=min_time))
+    response.set_cookie('unit', unit)
+    response.set_cookie('interval', str(batch))
 
+    return response
 def convert_temp(temp, unit):
     return temp if unit == 'C' else (temp * 1.8) + 32
 
