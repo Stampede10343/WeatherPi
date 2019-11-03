@@ -22,11 +22,19 @@
         </div>
       </div>
       <div class="row mt-4">
-        <div class="col col-md-4 mx-auto">
+        <div class="col col-xl-3 col-lg-4 col-md-5 col-sm-6 mx-auto">
           <form action"/temperature" method="GET">
             <div class="input-group mb-3">
+              <label class="form-control text-nowrap">Time Window</label>
+              <select id="time-window" name="window" class="custom-select">
+                <option value="1">Day</option>
+                <option value="3">3 Days</option>
+                <option value="7">Week</option>
+              </select>
+            </div>
+            <div class="input-group mb-3">
               <label class="form-control">Interval</label>
-              <select name="interval" class="custom-select">
+              <select id="time-interval" name="interval" class="custom-select">
                 <option value="1">1 minute</option>
                 <option value="5">5 minutes</option>
                 <option value="15">15 minutes</option>
@@ -36,7 +44,7 @@
             </div>
             <div class="input-group">
               <label class="form-control">Unit</label>
-              <select name="unit" class="custom-select">
+              <select id="unit" name="unit" class="custom-select">
                 <option value="F">Fahrenheit</option>
                 <option value="C">Celcius</option>
               </select>
@@ -81,6 +89,33 @@
               }
             }
           })
+    </script>
+    <script>
+      function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+      }
+
+      const timeWindowOption = document.getElementById("time-window");
+      const timeIntervalOption = document.getElementById("time-interval");
+      const interval = getCookie("interval");
+      for (var i = 0; i < timeIntervalOption.options.length; i++) {
+        let o = timeIntervalOption.options[i].value;
+        if (interval == o) {
+          timeIntervalOption.selectedIndex = i;
+          break;
+        }
+      }
+
+      const unitOption = document.getElementById("unit");
+      const u = getCookie("unit");
+      for (var i = 0; i < unitOption.options.length; i++) {
+        let opt = unitOption.options[i].value;
+        if(opt == u) {
+          unitOption.selectedIndex = i;
+        }
+      }
     </script>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
